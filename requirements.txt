@@ -1,1 +1,3 @@
 streamlit
+transformers
+torch  # Ensure PyTorch is installed for model loading
