@@ -1,5 +1,6 @@
 import streamlit as st
-from transformers import AutoModelForCausalLM, AutoTokenizer
+import google.generativeai as genai
+
 
 # App header
 st.header("Know Your Medicine")
