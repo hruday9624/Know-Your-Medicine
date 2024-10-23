@@ -1,4 +1,5 @@
 streamlit
 transformers
 torch
-google-generative-ai  # For interacting with Google Gemini API
+google-generativeai  
+pip
