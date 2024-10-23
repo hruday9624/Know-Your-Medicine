@@ -1,4 +1,4 @@
-torch
-transformers
 streamlit
-huggingface_hub
+transformers
+torch
+google-generative-ai  # For interacting with Google Gemini API
