@@ -2,43 +2,56 @@ import streamlit as st
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 # App header
-st.header("Know Your Medicine - Multiplication Table Generator")
+st.header("Know Your Medicine")
 
-# Load the model and tokenizer
-@st.cache_resource
-def load_model():
-    model_name = "gpt2"  # Using GPT-2 for faster builds
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForCausalLM.from_pretrained(model_name)
-    return model, tokenizer
+# Retrieve the API key from Streamlit secrets
+GOOGLE_API_KEY = st.secrets["GEMINI_API_KEY"]
 
-# Load the model
-model, tokenizer = load_model()
+# Configure the Google Generative AI API with your API key
+genai.configure(api_key=GOOGLE_API_KEY)
 
-# Input for the number to generate the multiplication table
-number = st.number_input("Enter a number:", min_value=1, max_value=100, value=5)
+# Input field for the medicine name
+st.subheader("Enter Medicine Details:")
+medicine_name = st.text_input('Medicine Name', '')
 
-# Define the prompt for generating the multiplication table
-prompt = f"Give me the multiplication table of {number} up to 12."
+# Create the prompt based on user input
+if medicine_name:
+    prompt = f"""
+    Analyze the following details:
+    1. Write the medicine name and purpose of the medicine.
+    2. Write down the symptoms for which this medicine should be used.
+    3. List the possible side effects of the medicine.
+    4. Mention any common drug interactions or contraindications.
+    5. Provide common brand names or generic alternatives, if available.
+    6. Mention any specific precautions (e.g., avoid alcohol, potential allergies).
 
-# Generate text based on the input
-if st.button("Generate Multiplication Table"):
-    # Tokenize the input prompt
-    tokenized_input = tokenizer(prompt, return_tensors="pt")
-    input_ids = tokenized_input["input_ids"]  # Using CPU for simplicity
-    attention_mask = tokenized_input["attention_mask"]  # Using CPU for simplicity
+    Medicine Name = {medicine_name}
+    """
 
-    # Generate the response from the model
-    response_token_ids = model.generate(
-        input_ids,
-        attention_mask=attention_mask,
-        max_new_tokens=150,
-        pad_token_id=tokenizer.eos_token_id
-    )
+# Button to submit the prompt
+if st.button("Generate"):
+    if medicine_name:  # Ensure the medicine name is entered
+        try:
+            # Initialize the generative model (adjust model name if needed)
+            model = genai.GenerativeModel('gemini-pro')  # Ensure this is the correct model name
 
-    # Decode the generated tokens to text
-    generated_text = tokenizer.decode(response_token_ids[0], skip_special_tokens=True)
+            # Generate content based on the prompt
+            response = model.generate_content(prompt)
+            
+            # Check if there is a response from the model
+            if response:
+                st.subheader("Generated Medicine Analysis:")
+                st.write(response.text)  # Display the generated response
+            else:
+                st.error("Error: Unable to generate the analysis.")
+                
+        except Exception as e:
+            st.error(f"Error: {e}")
+    else:
+        st.error("Please enter a medicine name to generate the analysis.")
 
-    # Display the generated multiplication table
-    st.write("Generated Multiplication Table:")
-    st.write(generated_text)
+# Add space or content at the bottom
+st.write("\n" * 20)  # Adds space to push the content down
+
+# Footer
+st.markdown("Built with 🧠 by Hruday & Google Gemini")
